@@ -18,6 +18,7 @@ class ActionController {
             $GLOBALS['view']->error = 'The title must be set.';
             $GLOBALS['view']->wikipage = $wikipage;
             View::printCreateView();
+            return;
         }
 
         //Save wikipage
@@ -46,6 +47,7 @@ class ActionController {
             $GLOBALS['view']->error = 'The title must be set.';
             $GLOBALS['view']->wikipage = $wikipage;
             View::printCreateView();
+            return;
         }
 
         //Wiki page not found
