@@ -34,6 +34,21 @@ class WikiPage {
     }
 
 
+    //Return the title in a encoded format for the url
+    public function getEncodedTitle() {
+        return rawurlencode($this->title);
+    }
+
+    //Return the content with all HTML replacements
+    public function getReplacedContent() {
+        $content = $this->content;
+        $content = preg_replace('/---(.*?)---/', '<h3>$1</h3>', $content);
+        $content = preg_replace('/\[\[(.*?)\]\]/', '<a href="index.php?title=$1">$1</a>', $content);
+        $content = preg_replace('/\n/', '<br />', $content);
+        return $content;
+    }
+
+
 
     //Save the wiki page
     public function save() {
@@ -59,14 +74,23 @@ class WikiPage {
     
     
     //Load a wiki page with a specific title
-    public static function load($title)
-    {
+    public static function load($title) {
+        if(is_null($title)) {
+            return null;
+        }
+
         if(isset($_SESSION[self::$sessionVariable][$title])) {
         	$content = $_SESSION[self::$sessionVariable][$title];
         	return new WikiPage($title, $content);
         }
 
         return null;
+    }
+
+
+    //Load a wiki page with a specific encoded title
+    public static function loadEncoded($encodedTitle) {
+        return static::load(rawurldecode($encodedTitle));
     }
 
 
