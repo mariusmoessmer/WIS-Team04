@@ -4,13 +4,12 @@
 //It also provides methods for persistency-management
 class WikiPage {
 
+    private $id;
     private $title;
     private $content;
-    private static $sessionVariable = 'wiki';
 
-
-
-    public function __construct($title, $content) {
+    public function __construct($id, $title, $content) {
+        $this->id = $id;
         $this->title = $title;
         $this->content = $content;
     }
@@ -21,23 +20,23 @@ class WikiPage {
         $this->title = $title;
     }
     
-    public function setContent($title) {
+    public function setContent($content) {
         $this->content = $content;
     }
 
-	public function getTitle() {
-	    return $this->title;
-	}
+    public function getID() {
+        return $this->id;
+    }
+
+    public function getTitle() {
+        return $this->title;
+    }
 
     public function getContent() {
         return $this->content;
     }
 
 
-    //Return the title in a encoded format for the url
-    public function getEncodedTitle() {
-        return rawurlencode($this->title);
-    }
 
     //Return the content with all HTML replacements
     public function getReplacedContent() {
@@ -52,60 +51,102 @@ class WikiPage {
 
     //Save the wiki page
     public function save() {
-        if(!is_null($this->title)) {
-            $_SESSION[self::$sessionVariable][$this->title] = $this->content;
-            return true;
-        }
+        $mysqli = DatabaseManager::getDatabase();
 
-        return false;
+        if(is_null($this->id)) {
+            //Insert wikipage
+            
+            if($stmt = $mysqli->prepare("INSERT INTO `wikipage` (`title`, `content`, `created_ipaddress`) VALUES (?,?,?)")) {           
+                $stmt->bind_param("ssi", $this->title, $this->content, ip2long($_SERVER['REMOTE_ADDR']));
+                $stmt->execute();
+                $this->id = $mysqli->insert_id;
+                $affected_rows = $stmt->affected->rows;
+                $stmt->close();
+                return $affected_rows > 0;
+            }
+
+            return false;
+        } else {
+            //Update wikipage
+
+            if($stmt = $mysqli->prepare("UPDATE `wikipage` SET `title` = ?, `content` = ? WHERE wikipage_id = ?")) {           
+                $stmt->bind_param("ssi", $this->title, $this->content, $this->id);
+                $stmt->execute();
+                $affected_rows = $stmt->affected->rows;
+                $stmt->close();
+                return $affected_rows > 0;
+            }
+
+            return false;
+        }
     }
 
 
     //Delete the wiki page
     public function delete() {
-        if(!is_null($this->title)) {
-        	unset($_SESSION[self::$sessionVariable][$this->title]);
-            return true;
-        }
+        if(!is_null($this->id)) {
+            $mysqli = DatabaseManager::getDatabase();
 
+            if($stmt = $mysqli->prepare("DELETE FROM `wikipage` WHERE wikipage_id = ?")) {
+                // "i" because corresponding variable $id has type integer
+                $stmt->bind_param("i", $this->id);
+                $stmt->execute();
+                $affected_rows = $stmt->affected_rows;
+                $stmt->close();
+                return $affected_rows > 0;
+            }
+
+        }
         return false;
     }
 
     
-    
-    //Load a wiki page with a specific title
-    public static function load($title) {
-        if(is_null($title)) {
+    //Load a wiki page with a specific id
+    public static function load($id) {
+        if(is_null($id)) {
             return null;
         }
 
-        if(isset($_SESSION[self::$sessionVariable][$title])) {
-        	$content = $_SESSION[self::$sessionVariable][$title];
-        	return new WikiPage($title, $content);
+        $result = null;
+
+        $mysqli = DatabaseManager::getDatabase();
+
+        if($stmt = $mysqli->prepare("SELECT title, content FROM `wikipage` WHERE wikipage_id = ?")) {
+            // "i" because corresponding variable $id has type integer
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $stmt->bind_result($title, $content);
+
+            if($stmt->fetch()) {
+                $result = new WikiPage($id, $title, $content);
+            }
+            
+            $stmt->close();
         }
 
-        return null;
-    }
-
-
-    //Load a wiki page with a specific encoded title
-    public static function loadEncoded($encodedTitle) {
-        return static::load(rawurldecode($encodedTitle));
+        return $result;
     }
 
 
     //Load all wiki pages
     public static function loadAll() {
-        if(isset($_SESSION[self::$sessionVariable])) {
-        	$pages = array();
-        	
-        	foreach($_SESSION[self::$sessionVariable] as $key => $value) {
-        		$pages[] = new WikiPage($key, $value);
-        	}
-        	
-        	return $pages;
+        $mysqli = DatabaseManager::getDatabase();
+
+        if($stmt = $mysqli->prepare("SELECT wikipage_id, title, content FROM `wikipage`")) {
+            $pages = array();
+            
+            $stmt->execute();
+            $stmt->bind_result($id, $title, $content);
+            
+            while($stmt->fetch()) {
+                $pages[] = new WikiPage($id, $title, $content);
+            }
+            
+            $stmt->close();
+
+            return $pages;
         } else {
-	        return null;
+            return null;
         }
     }
 }

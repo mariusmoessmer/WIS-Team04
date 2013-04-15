@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL);
+
 session_start();
 
 
@@ -14,5 +16,6 @@ require_once('models/wikipage.php');
 require_once('views/view.php');
 
 //Controllers
+require_once('controllers/dbmanager.php');
 require_once('controllers/show.php');
 require_once('controllers/action.php');

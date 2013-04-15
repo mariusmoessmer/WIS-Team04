@@ -44,7 +44,7 @@ class ShowController {
      * @return void
      */
     public static function showPage() {
-        $wikiPage = WikiPage::load($_GET['title']);
+        $wikiPage = WikiPage::load($_GET['id']);
     
         if($wikiPage != null) {
             $GLOBALS['view']->wikipage = $wikiPage;
@@ -70,7 +70,7 @@ class ShowController {
      * @return void
      */
     public static function showEditView() {
-        $wikiPage = WikiPage::load($_GET['title']);
+        $wikiPage = WikiPage::load($_GET['id']);
     
         if($wikiPage != null) {
             $GLOBALS['view']->wikipage = $wikiPage;

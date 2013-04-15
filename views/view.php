@@ -13,7 +13,7 @@ class View {
 
         if($wikipages != null) {
             foreach($wikipages as $wikipage) {
-                echo '<li><a href="index.php?title='. $wikipage->getEncodedTitle() . '">' . $wikipage->getTitle() . '</a></li>';
+                echo '<li><a href="index.php?id='. $wikipage->getID() . '">' . $wikipage->getTitle() . '</a></li>';
             }
         }
 
@@ -44,8 +44,8 @@ class View {
         
         //Print the link list
         echo '<p class="links">';
-        echo '<a href="edit.php?title='. $wikipage->getEncodedTitle() . '">Edit</a> - ';
-        echo '<a href="delete.php?title='. $wikipage->getEncodedTitle() . '">Delete</a> - ';
+        echo '<a href="edit.php?id='. $wikipage->getID() . '">Edit</a> - ';
+        echo '<a href="delete.php?id='. $wikipage->getID() . '">Delete</a> - ';
         echo '<a href="index.php">All pages</a>';
         echo '</p>';
         

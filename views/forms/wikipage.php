@@ -1,5 +1,5 @@
         <form action="<?php echo $GLOBALS['view']->formAction; ?>" method="<?php echo $GLOBALS['view']->formMethod; ?>">
-                <input name="old" type="hidden" value="<?php echo $GLOBALS['view']->wikipage->getTitle(); ?>" />
+                <input name="id" type="hidden" value="<?php echo $GLOBALS['view']->wikipage->getID(); ?>" />
         
                 <label for="title">Title</label></br>
                 <input name="title" type="text" value="<?php echo $GLOBALS['view']->wikipage->getTitle(); ?>" class="text" /></br>
