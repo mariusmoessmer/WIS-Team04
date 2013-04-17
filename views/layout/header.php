@@ -4,8 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>Team 04</title>
 
-    <link rel='stylesheet' href='../../public/css/normalize.css' type='text/css' media='screen' />
-    <link rel='stylesheet' href='../../public/css/style.css' type='text/css' media='screen' />
+    <link rel='stylesheet' href='css/normalize.css' type='text/css' media='screen' />
+    <link rel='stylesheet' href='css/style.css' type='text/css' media='screen' />
 </head>
 
 <body>
