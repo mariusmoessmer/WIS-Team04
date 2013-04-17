@@ -46,12 +46,12 @@ class WikiPage {
         //$content = preg_replace_callback('/\[\[(.*?)\]\]/', "<a href=\"index.php?id='$1'\">strlen('$1')</a>", $content);
 		$content = preg_replace_callback('/\[\[(.*?)\]\]/', function($matches){ 
 			$linked_wikipage_title = $matches[1];
-			$linked_wikipage = WikiPage::findByTitle($linked_wikipage_title);		
-				if(is_null($linked_wikipage))
-				{
-					return "!!!LINKED WIKIPAGE \'".$linked_wikipage_title."\' DOES NOT EXIST!!!";
-				}
-			return "<a href=\"index.php?id={$linked_wikipage->id}\">".$linked_wikipage->title."</a>"; 
+			$linked_wikipage = WikiPage::findByTitle($linked_wikipage_title);
+
+			if(is_null($linked_wikipage)) {
+				return '[[' . $linked_wikipage_title . ']]';
+			}
+			return '<a href="index.php?id=' . $linked_wikipage->getID() . '">' . $linked_wikipage->getTitle() . '</a>'; 
 		}, $content);
 
 
