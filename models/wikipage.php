@@ -8,7 +8,7 @@ class WikiPage {
     private $title;
     private $content;
 
-    public function __construct($id, $title, $content) {
+    public function __construct($id = -1, $title = "", $content = "") {
         $this->id = $id;
         $this->title = $title;
         $this->content = $content;
@@ -41,8 +41,20 @@ class WikiPage {
     //Return the content with all HTML replacements
     public function getReplacedContent() {
         $content = $this->content;
-        $content = preg_replace('/---(.*?)---/', '<h3>$1</h3>', $content);
-        $content = preg_replace('/\[\[(.*?)\]\]/', '<a href="index.php?title=$1">$1</a>', $content);
+        $content = preg_replace('/---(.*?)---/', '<h3>$1</h3>', $content);		
+		
+        //$content = preg_replace_callback('/\[\[(.*?)\]\]/', "<a href=\"index.php?id='$1'\">strlen('$1')</a>", $content);
+		$content = preg_replace_callback('/\[\[(.*?)\]\]/', function($matches){ 
+			$linked_wikipage_title = $matches[1];
+			$linked_wikipage = WikiPage::findByTitle($linked_wikipage_title);		
+				if(is_null($linked_wikipage))
+				{
+					return "!!!LINKED WIKIPAGE \'".$linked_wikipage_title."\' DOES NOT EXIST!!!";
+				}
+			return "<a href=\"index.php?id={$linked_wikipage->id}\">".$linked_wikipage->title."</a>"; 
+		}, $content);
+
+
         $content = preg_replace('/\n/', '<br />', $content);
         return $content;
     }
@@ -126,6 +138,30 @@ class WikiPage {
 
         return $result;
     }
+	
+	public static function findByTitle($title)
+	{
+		if(is_null($title)) {
+            return null;
+        }
+
+        $result = null;
+
+        $mysqli = DatabaseManager::getDatabase();
+        if($stmt = $mysqli->prepare("SELECT wikipage_id, content FROM `wikipage` WHERE title = ?")) {		
+            // "s" because corresponding variable $id has type string
+            $stmt->bind_param("s", $title);
+            $stmt->execute();
+            $stmt->bind_result($id, $content);
+            if($stmt->fetch()) {
+                $result = new WikiPage($id, $title, $content);
+            }
+            
+            $stmt->close();
+        }
+
+        return $result;
+	}
 
 
     //Load all wiki pages

@@ -24,9 +24,9 @@ class View {
 
 
         //Print message
-        if(!is_null($message)) {
-            echo '<p class="message">' . $message . '</p>';
-        }
+        //if(isset($GLOBALS['view']->message) && !is_null($GLOBALS['view']->message)) {
+        //    echo '<p class="message">' . $GLOBALS['view']->message . '</p>';
+        //}
 
         static::printFooter();
     }
