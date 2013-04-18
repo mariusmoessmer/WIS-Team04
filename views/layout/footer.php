@@ -6,7 +6,8 @@
 
             Gruppenmitglieder:
             <a href="mailto:alex.lanz@student.uibk.ac.at">Alex Lanz</a>
-            <a href="mailto:marius.b.moessmer@student.uibk.ac.at">Marius M&ouml;ssmer</a>
+            <a href="mailto:marius.b.moessmer@student.uibk.ac.at">Marius M&ouml;ssmer</a><br />
+            Rendertime: <?php echo round((microtime(true) - $GLOBALS['startTime']) * 1000); ?> ms
 
       </footer>
 

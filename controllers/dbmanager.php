@@ -7,7 +7,7 @@
  */
 class DatabaseManager
 {
-    
+
     private static $instance;
     public $db;
 

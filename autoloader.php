@@ -4,10 +4,8 @@ error_reporting(E_ALL);
 
 session_start();
 
-
-//Create view element
-$GLOBALS['view'] = new stdClass;
-
+//Time
+$GLOBALS['startTime'] = microtime(true);
 
 //Tools
 require_once('tools/paginator.php');

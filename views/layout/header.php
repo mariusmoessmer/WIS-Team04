@@ -18,7 +18,7 @@
       footer {
         border-top: 1px solid #e3e3e3;
         background-color: #f5f5f5;
-        height: 30px;
+        height: 45px;
         padding-top: 10px;
       }
 
