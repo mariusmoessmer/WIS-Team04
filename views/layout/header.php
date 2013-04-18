@@ -79,6 +79,29 @@
 
         <!-- Content -->
         <div class="span9">
+          <?php
+            //Print message
+            $message = static::getVariable('message');
+            
+            if(!is_null($message)) {
+                echo '<div class="alert alert-info">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        ' . $message . '
+                      </div>';
+            }
+
+            //Print error
+            $error = static::getVariable('error');
+            
+            if(!is_null($error)) {
+                echo '<div class="alert alert-error">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        ' . $error . '
+                      </div>';
+            }
+          ?>
+
+
           <div class="page-header">
             <h1><?php echo View::getVariable('title'); ?> <small><?php echo View::getVariable('subtitle'); ?></small></h1>
           </div>

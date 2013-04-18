@@ -44,11 +44,6 @@ class View {
 
         echo '</div>';
 
-        //Print message
-        //if(isset($GLOBALS['view']->message) && !is_null($GLOBALS['view']->message)) {
-        //    echo '<p class="message">' . $GLOBALS['view']->message . '</p>';
-        //}
-
         static::printFooter();
     }
     
@@ -115,7 +110,7 @@ class View {
     public static function printErrorView() {
         static::setTitle('Article', 'Error');
         static::printHeader();
-        echo '<p class="red">Artile not found</p>';
+        echo '<div class="alert alert-error">Artile not found</div>';
         static::printFooter();
     }
     

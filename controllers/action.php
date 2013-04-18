@@ -15,8 +15,8 @@ class ActionController {
 
         //Check if title is set
         if(!isset($title) || $title == '') {
-            $GLOBALS['view']->error = 'The title must be set.';
-            $GLOBALS['view']->wikipage = $wikipage;
+            View::setVariable('error', 'The title must be set.');
+            View::setVariable('article', $wikipage);
             View::printCreateView();
             return;
         }
@@ -42,8 +42,8 @@ class ActionController {
 
         //Check if title is set
         if(!isset($title) || $title == '') {
-            $GLOBALS['view']->error = 'The title must be set.';
-            $GLOBALS['view']->wikipage = $wikipage;
+            View::setVariable('error', 'The title must be set.');
+            View::setVariable('article', $wikipage);
             View::printEditView();
             return;
         }

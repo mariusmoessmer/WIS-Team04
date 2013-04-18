@@ -13,24 +13,30 @@ class ShowController {
         if(isset($_GET['message'])) {
             switch($_GET['message']) {
                 case 'deleted':
-                    $GLOBALS['view']->message = 'The wiki page was deleted';
+                    $message = 'The wiki page was deleted';
                     break;
 
                 default:
+                    $message = null;
                     break;
             }
+
+            View::setVariable('message', $message);
         }
 
         //Get errors
         if(isset($_GET['error'])) {
             switch($_GET['error']) {
                 case 'notfound':
-                    $GLOBALS['view']->error = 'The wiki page was not found';
+                    $error = 'The wiki page was not found';
                     break;
 
                 default:
+                    $error = null;
                     break;
             }
+
+            View::setVariable('error', $error);
         }
 
         //List pages
