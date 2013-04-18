@@ -36,7 +36,7 @@ class DatabaseManager
     public static function getDatabase() {
         $instance = self::getInstance();
         if ($instance->db == null) {
-            $instance->db = mysqli_connect("localhost", "wikiuser", "wikiuser", "wiki");
+            $instance->db = mysqli_connect("localhost", "wikiuser", "wikiuser", "wis03");
             //$instance->db = mysqli_connect("localhost", "root", "root", "wiki");
         }
         return $instance->db;
