@@ -8,4 +8,4 @@ CREATE TABLE `wikipage` (
   UNIQUE KEY `Name_UNIQUE` (`title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-ALTER TABLE `wikipage` ADD INDEX (`title`);
+--ALTER TABLE `wikipage` ADD INDEX (`title`);

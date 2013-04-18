@@ -1,25 +1,18 @@
-                    
-                    <?php
-                        if(isset($GLOBALS['view']->message)) {
-                            echo '<div class="message">' . $GLOBALS['view']->message . '</div>';
-                        }
-                    ?>
+        </div>
+      </div>
 
-                    <?php
-                        if(isset($GLOBALS['view']->error)) {
-                            echo '<div class="error">' . $GLOBALS['view']->error . '</div>';
-                        }
-                    ?>
+      <!-- Footer -->
+      <footer class="navbar-fixed-bottom text-center">
 
-                    </div>
-            </div>
+            Gruppenmitglieder:
+            <a href="mailto:alex.lanz@student.uibk.ac.at">Alex Lanz</a>
+            <a href="mailto:marius.b.moessmer@student.uibk.ac.at">Marius M&ouml;ssmer</a>
 
-            <div class="info">
-                    Gruppenmitglieder:
-                    <a href="mailto:alex.lanz@student.uibk.ac.at">Alex Lanz</a>
-                    <a href="mailto:marius.b.moessmer@student.uibk.ac.at">Marius M&ouml;ssmer</a>
-            </div>
+      </footer>
+
     </div>
 
-</body>
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+  </body>
 </html>

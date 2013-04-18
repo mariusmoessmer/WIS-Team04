@@ -3,7 +3,7 @@
 class ShowController {
 
     /**
-     * List all existing wiki pages
+     * List all existing articles
      * 
      * @return void
      */
@@ -34,12 +34,12 @@ class ShowController {
         }
 
         //List pages
-        $GLOBALS['view']->wikipages = WikiPage::loadAll();
+        View::setVariable('articles', WikiPage::loadAll());
         View::printListView();
     }
 
     /**
-     * Show a wiki page
+     * Show an article
      * 
      * @return void
      */
@@ -47,7 +47,7 @@ class ShowController {
         $wikiPage = WikiPage::load($_GET['id']);
     
         if($wikiPage != null) {
-            $GLOBALS['view']->wikipage = $wikiPage;
+            View::setVariable('article', $wikiPage);
             View::printShowView();
         } else {
             View::printErrorView();
@@ -55,25 +55,25 @@ class ShowController {
     }
 
     /**
-     * Show the view to create a wiki page
+     * Show the view to create an article
      * 
      * @return void
      */
     public static function showCreateView() {
-        $GLOBALS['view']->wikipage = new WikiPage;
+        View::setVariable('article', new WikiPage);
         View::printCreateView();
     }
 
     /**
-     * Show the view to edit a wiki page
+     * Show the view to edit an article
      * 
      * @return void
      */
     public static function showEditView() {
-        $wikiPage = WikiPage::load($_GET['id']);
+        $article = WikiPage::load($_GET['id']);
     
-        if($wikiPage != null) {
-            $GLOBALS['view']->wikipage = $wikiPage;
+        if($article != null) {
+            View::setVariable('article', $article);
             View::printEditView();
         } else {
             View::printErrorView();

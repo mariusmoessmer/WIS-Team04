@@ -1,29 +1,84 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
     <title>Team 04</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
 
-    <link rel='stylesheet' href='css/normalize.css' type='text/css' media='screen' />
-    <link rel='stylesheet' href='css/style.css' type='text/css' media='screen' />
-</head>
+      .sidebar-nav {
+        padding: 9px 0;
+      }
 
-<body>
+      footer {
+        border-top: 1px solid #e3e3e3;
+        background-color: #f5f5f5;
+        height: 30px;
+        padding-top: 10px;
+      }
 
-    <div id="header">
+      #list a {
+        margin: 4px 0;
+        text-align: left;
+      }
 
-            <div class="blue-box">
-                    <div class="line-box">&nbsp;</div>
-            </div>
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+  </head>
 
-            <div class="white-box">
-                    <div class="line-box title">Wiki - Team 04<br />
-                            <span class="subtitle"><?php echo $GLOBALS['view']->subtitle; ?></span>
-                    </div>
-            </div>
+  <body>
 
+    <!-- Header -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="brand" href="index.php">Team 04 - Wiki</a>
+
+          <form class="navbar-search pull-right" action="index.php" method="GET">
+            <input name="search" type="search" class="search-query" placeholder="Search">
+          </form>
+        </div>
+      </div>
     </div>
 
-    <div id="body">
-            <div id="content">
-                <div class="line-box">
+    <div class="container-fluid">
+      <div class="row-fluid">
+
+        <!-- Sidebar -->
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="nav-header">Actions</li>
+              <li><a href="index.php">Show all articles</a></li>
+              <li><a href="create.php">Create new article</a></li>
+
+              <?php
+                foreach(View::getVariable('navigation') as $navigation) {
+                  echo '<li><a href="' . $navigation['link'] . '">' . $navigation['text'] . '</a></li>';
+                }
+              ?>
+
+              <li class="nav-header">Database</li>
+              <li><a href="#">Generate random articles</a></li>
+              <li><a href="#">Delete all articles</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="span9">
+          <div class="page-header">
+            <h1><?php echo View::getVariable('title'); ?> <small><?php echo View::getVariable('subtitle'); ?></small></h1>
+          </div>

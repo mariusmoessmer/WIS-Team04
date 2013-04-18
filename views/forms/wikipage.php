@@ -1,11 +1,12 @@
-        <form action="<?php echo $GLOBALS['view']->formAction; ?>" method="<?php echo $GLOBALS['view']->formMethod; ?>">
-                <input name="id" type="hidden" value="<?php echo $GLOBALS['view']->wikipage->getID(); ?>" />
+        <form action="<?php echo View::getVariable('formAction'); ?>" method="<?php echo View::getVariable('formMethod'); ?>">
+                <input name="id" type="hidden" value="<?php echo View::getVariable('article')->getID(); ?>" />
         
-                <label for="title">Title</label></br>
-                <input name="title" type="text" value="<?php echo $GLOBALS['view']->wikipage->getTitle(); ?>" class="text" /></br>
+                <label for="title">Title</label>
+                <input name="title" type="text" value="<?php echo View::getVariable('article')->getTitle(); ?>" class="span12" />
                 
-                <label for="content">Content</label></br>
-                <textarea name="content" type="textarea" class="textarea"><?php echo $GLOBALS['view']->wikipage->getContent(); ?></textarea></br>
+                <label for="content">Content</label>
+                <textarea name="content" rows="10" class="span12"><?php echo View::getVariable('article')->getContent(); ?></textarea>
 
-                <input name="submit" type="submit" value="Save" class="submit" />
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn">Cancel</button>
         </form>
