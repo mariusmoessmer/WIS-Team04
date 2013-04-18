@@ -1,9 +1,9 @@
 <?php
 
-//Describes a value-object for a wikipage.
+//Describes a value-object for a Article.
 //It also provides methods for persistency-management
-class WikiPage {
-
+class Article {
+	private static $TABLENAME = '`article`';
     private $id;
     private $title;
     private $content;
@@ -46,10 +46,10 @@ class WikiPage {
         //$content = preg_replace_callback('/\[\[(.*?)\]\]/', "<a href=\"index.php?id='$1'\">strlen('$1')</a>", $content);
 		$content = preg_replace_callback('/\[\[(.*?)\]\]/', function($matches){ 
 			$linked_wikipage_title = $matches[1];
-			$linked_wikipage = WikiPage::findByTitle($linked_wikipage_title);
+			$linked_wikipage = Article::findByTitle($linked_wikipage_title);
 
 			if(is_null($linked_wikipage)) {
-				return '[[' . $linked_wikipage_title . ']]';
+				return generateLinkText($linked_wikipage);
 			}
 			return '<a href="index.php?id=' . $linked_wikipage->getID() . '">' . $linked_wikipage->getTitle() . '</a>'; 
 		}, $content);
@@ -66,13 +66,14 @@ class WikiPage {
         $mysqli = DatabaseManager::getDatabase();
 
         if(is_null($this->id)) {
-            //Insert wikipage
+            //Insert article
             
-            if($stmt = $mysqli->prepare("INSERT INTO `wikipage` (`title`, `content`, `created_ipaddress`) VALUES (?,?,?)")) {           
-                $stmt->bind_param("ssi", $this->title, $this->content, ip2long($_SERVER['REMOTE_ADDR']));
+            if($stmt = $mysqli->prepare("INSERT INTO ".self::$TABLENAME." (`title`, `content`, `created_ipaddress`) VALUES (?,?,?)")) {
+            	$ipAsLong = ip2long($_SERVER['REMOTE_ADDR']);           
+                $stmt->bind_param("ssi", $this->title, $this->content, $ipAsLong);
                 $stmt->execute();
                 $this->id = $mysqli->insert_id;
-                $affected_rows = $stmt->affected->rows;
+                $affected_rows = $stmt->affected_rows;
                 $stmt->close();
                 return $affected_rows > 0;
             }
@@ -81,7 +82,7 @@ class WikiPage {
         } else {
             //Update wikipage
 
-            if($stmt = $mysqli->prepare("UPDATE `wikipage` SET `title` = ?, `content` = ? WHERE wikipage_id = ?")) {           
+            if($stmt = $mysqli->prepare("UPDATE ".self::$TABLENAME." SET `title` = ?, `content` = ? WHERE article_id = ?")) {           
                 $stmt->bind_param("ssi", $this->title, $this->content, $this->id);
                 $stmt->execute();
                 $affected_rows = $stmt->affected->rows;
@@ -99,7 +100,7 @@ class WikiPage {
         if(!is_null($this->id)) {
             $mysqli = DatabaseManager::getDatabase();
 
-            if($stmt = $mysqli->prepare("DELETE FROM `wikipage` WHERE wikipage_id = ?")) {
+            if($stmt = $mysqli->prepare("DELETE FROM ".self::$TABLENAME." WHERE article_id = ?")) {
                 // "i" because corresponding variable $id has type integer
                 $stmt->bind_param("i", $this->id);
                 $stmt->execute();
@@ -111,6 +112,17 @@ class WikiPage {
         }
         return false;
     }
+    
+    // deletes all articles from database
+    public static function deleteAll()
+    {
+		$mysqli = DatabaseManager::getDatabase();
+
+            if($stmt = $mysqli->prepare("DELETE FROM ".self::$TABLENAME)) {
+                $stmt->execute();
+                $stmt->close();
+            }
+	}
 
     
     //Load a wiki page with a specific id
@@ -123,14 +135,14 @@ class WikiPage {
 
         $mysqli = DatabaseManager::getDatabase();
 
-        if($stmt = $mysqli->prepare("SELECT title, content FROM `wikipage` WHERE wikipage_id = ?")) {
+        if($stmt = $mysqli->prepare("SELECT title, content FROM ".self::$TABLENAME." WHERE article_id = ?")) {
             // "i" because corresponding variable $id has type integer
             $stmt->bind_param("i", $id);
             $stmt->execute();
             $stmt->bind_result($title, $content);
 
             if($stmt->fetch()) {
-                $result = new WikiPage($id, $title, $content);
+                $result = new Article($id, $title, $content);
             }
             
             $stmt->close();
@@ -148,13 +160,13 @@ class WikiPage {
         $result = null;
 
         $mysqli = DatabaseManager::getDatabase();
-        if($stmt = $mysqli->prepare("SELECT wikipage_id, content FROM `wikipage` WHERE title = ?")) {		
+        if($stmt = $mysqli->prepare("SELECT article_id, content FROM ".self::$TABLENAME." WHERE title = ?")) {		
             // "s" because corresponding variable $id has type string
             $stmt->bind_param("s", $title);
             $stmt->execute();
             $stmt->bind_result($id, $content);
             if($stmt->fetch()) {
-                $result = new WikiPage($id, $title, $content);
+                $result = new Article($id, $title, $content);
             }
             
             $stmt->close();
@@ -163,19 +175,18 @@ class WikiPage {
         return $result;
 	}
 
-
     //Load all wiki pages
     public static function loadAll() {
         $mysqli = DatabaseManager::getDatabase();
 
-        if($stmt = $mysqli->prepare("SELECT wikipage_id, title, content FROM `wikipage`")) {
+        if($stmt = $mysqli->prepare("SELECT article_id, title, content FROM ".self::$TABLENAME)) {
             $pages = array();
             
             $stmt->execute();
             $stmt->bind_result($id, $title, $content);
             
             while($stmt->fetch()) {
-                $pages[] = new WikiPage($id, $title, $content);
+                $pages[] = new Article($id, $title, $content);
             }
             
             $stmt->close();
@@ -184,5 +195,82 @@ class WikiPage {
         } else {
             return null;
         }
+    }
+    
+    //generates an amount of random articles and saves them to database
+    public static function generateRandomAndSave($amount = 10000) {
+        for ($i = 0; $i < $amount; $i++) {
+        	self::generateRandom()->save();
+        }
+    }
+    
+    private static $RANDOM_TITLE_LENGTH = 10;
+    private static $CONTENT_GAP_LENGTH = 10;
+    private static $MAX_RANDOM_ARTICLE_LINKS = 3;
+    //generates a random article
+    private static function generateRandom() {	
+		
+		$title = self::randomString(self::$RANDOM_TITLE_LENGTH);
+		
+		srand((double)microtime()*1000000);
+		$randomGeneratedLinkAmount = rand() % self::$MAX_RANDOM_ARTICLE_LINKS;
+		
+		
+		$content = self::randomString(self::$CONTENT_GAP_LENGTH);
+		for ($i = 0; $i < $randomGeneratedLinkAmount; $i++) {
+			$content = $content . ' ' . self::generateLinkText(self::getRandomArticle());
+			$content = $content . ' ' . self::randomString(self::$CONTENT_GAP_LENGTH);
+		}
+		
+		return new Article(null, $title, $content);
+		
+    }
+    
+    private static function generateLinkText($article)
+    {
+		if(is_null($article))
+		{
+			return '';
+		}
+		
+		return '[[' . $article->title . ']]';	
+	}
+    
+    private static function getRandomArticle()
+    {		
+		$result = null;
+
+        $mysqli = DatabaseManager::getDatabase();
+
+        if($stmt = $mysqli->prepare('SELECT article_id, article_id* RAND( ) AS random_no FROM '.self::$TABLENAME.'ORDER BY random_no LIMIT 1')) {
+            $stmt->execute();
+            $stmt->bind_result($article_id, $random_no);
+
+            if($stmt->fetch()) {
+                $result = self::load($article_id);
+            }
+            
+            $stmt->close();
+        }
+
+        return $result;
+		
+	}
+    
+    // define allowed chars for generating random strings
+    public static $randomChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    private static function randomString($length = 6) {
+    	$generatedString = '';
+    	// init rand
+		srand((double)microtime()*1000000);
+		for ($i = 0; $i < $length; $i++) {
+			// get random number: 0 <= number < strlen($randomChars)
+			$num = rand() % strlen(self::$randomChars);
+			// extract random char
+			$tmp = substr(self::$randomChars, $num, 1);
+			$generatedString = $generatedString . $tmp;
+		}
+  	
+		return $generatedString;
     }
 }

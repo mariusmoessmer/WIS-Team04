@@ -40,7 +40,7 @@ class ShowController {
         }
 
         //List pages
-        View::setVariable('articles', WikiPage::loadAll());
+        View::setVariable('articles', Article::loadAll());
 
         //Set pagination
         $paginator = Paginator::make('index.php', 100, 10);
@@ -57,7 +57,7 @@ class ShowController {
      * @return void
      */
     public static function showPage() {
-        $wikiPage = WikiPage::load($_GET['id']);
+        $wikiPage = Article::load($_GET['id']);
     
         if($wikiPage != null) {
             View::setVariable('article', $wikiPage);
@@ -65,7 +65,16 @@ class ShowController {
         } else {
             View::printErrorView();
         }
-    }
+	}
+	
+	public static function showArticleGenerationFinished() {
+		View::printArticleGenerationFinished();
+	}
+	
+	public static function showDeleteArticlesFinished()
+	{
+		View::printDeleteArticlesFinished();
+	}
 
     /**
      * Show the view to create an article
@@ -73,7 +82,7 @@ class ShowController {
      * @return void
      */
     public static function showCreateView() {
-        View::setVariable('article', new WikiPage);
+        View::setVariable('article', new Article);
         View::printCreateView();
     }
 
@@ -83,7 +92,7 @@ class ShowController {
      * @return void
      */
     public static function showEditView() {
-        $article = WikiPage::load($_GET['id']);
+        $article = Article::load($_GET['id']);
     
         if($article != null) {
             View::setVariable('article', $article);
