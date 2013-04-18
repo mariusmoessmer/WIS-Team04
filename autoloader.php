@@ -11,7 +11,7 @@ $GLOBALS['startTime'] = microtime(true);
 require_once('tools/paginator.php');
 
 //Models
-require_once('models/wikipage.php');
+require_once('models/article.php');
 
 //Views
 require_once('views/view.php');

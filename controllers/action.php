@@ -10,8 +10,7 @@ class ActionController {
     public static function create() {
         $title = $_POST['title'];
         $content = $_POST['content'];
-
-        $wikipage = new WikiPage(null, $title, $content);
+        $wikipage = new Article(null, $title, $content);
 
         //Check if title is set
         if(!isset($title) || $title == '') {
@@ -49,7 +48,7 @@ class ActionController {
         }
 
         //Load wiki page
-        $wikipage = WikiPage::load($id);
+        $wikipage = Article::load($id);
 
         if(is_null($wikipage)) {
             header('Location: index.php?error=notfound');

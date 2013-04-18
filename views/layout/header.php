@@ -71,8 +71,8 @@
               ?>
 
               <li class="nav-header">Database</li>
-              <li><a href="#">Generate random articles</a></li>
-              <li><a href="#">Delete all articles</a></li>
+              <li><a href="database.php?action=generate_random">Generate random articles</a></li>
+              <li><a href="database.php?action=delete_all">Delete all articles</a></li>
             </ul>
           </div>
         </div>
