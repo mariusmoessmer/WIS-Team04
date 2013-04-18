@@ -9,6 +9,9 @@ session_start();
 $GLOBALS['view'] = new stdClass;
 
 
+//Tools
+require_once('tools/paginator.php');
+
 //Models
 require_once('models/wikipage.php');
 

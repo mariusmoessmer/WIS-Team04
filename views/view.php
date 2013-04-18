@@ -4,26 +4,6 @@ class View {
 
     private static $variables = array();
 
-    /**
-     * Sets a variable to the view class
-     * @param  string $name  The name of the variable
-     * @param  mixed  $value The value of the variable
-     * @return void
-     */
-    public static function setVariable($name, $value) {
-        static::$variables[$name] = $value;
-    }
-
-
-    /**
-     * Returns a variable value of the view class
-     * @param  string $name The name of the variable
-     * @return mixed        The value of the variable
-     */
-    public static function getVariable($name) {
-        return static::$variables[$name];
-    }
-
 
     /**
      * Prints an overview of all existing articles
@@ -33,7 +13,8 @@ class View {
         static::setTitle('Articles', 'List');
         static::printHeader();
         
-        echo '<div id="list">';
+        //Print articles
+        echo '<div id="list" class="row-fluid">';
 
         $articles = static::getVariable('articles');;
         if($articles != null) {
@@ -42,6 +23,12 @@ class View {
             }
         }
 
+        echo '</div>';
+
+        //Print pagination
+        $paginator = View::getVariable('paginator');
+        echo '<div class="pagination-centered">';
+        echo $paginator->links();
         echo '</div>';
 
         static::printFooter();
@@ -137,6 +124,27 @@ class View {
     //Prints the footer of the website
     private static function printFooter() {
         include('layout/footer.php');
+    }
+
+
+    /**
+     * Sets a variable to the view class
+     * @param  string $name  The name of the variable
+     * @param  mixed  $value The value of the variable
+     * @return void
+     */
+    public static function setVariable($name, $value) {
+        static::$variables[$name] = $value;
+    }
+
+
+    /**
+     * Returns a variable value of the view class
+     * @param  string $name The name of the variable
+     * @return mixed        The value of the variable
+     */
+    public static function getVariable($name) {
+        return static::$variables[$name];
     }
 
 

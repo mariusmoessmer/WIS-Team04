@@ -41,6 +41,13 @@ class ShowController {
 
         //List pages
         View::setVariable('articles', WikiPage::loadAll());
+
+        //Set pagination
+        $paginator = Paginator::make('index.php', 100, 10);
+        //$appendens = array('search' => 'test');
+        //$paginator->appends($appendens);
+        View::setVariable('paginator', $paginator);
+
         View::printListView();
     }
 

@@ -7,6 +7,7 @@
  */
 class DatabaseManager
 {
+    
     private static $instance;
     public $db;
 
@@ -15,6 +16,7 @@ class DatabaseManager
      *
      */
     protected function __construct() {}
+
 
     /**
      * Returns an instance of a Database_manager.
@@ -28,6 +30,8 @@ class DatabaseManager
         }
         return self::$instance;
     }
+
+
     /**
      * Returns an instance of a Database_manager.
      *
@@ -36,9 +40,10 @@ class DatabaseManager
     public static function getDatabase() {
         $instance = self::getInstance();
         if ($instance->db == null) {
-            //$instance->db = mysqli_connect("localhost", "wikiuser", "wikiuser", "wis04");
-            $instance->db = mysqli_connect("localhost", "root", "root", "wiki");
+            $instance->db = mysqli_connect("localhost", "wikiuser", "wikiuser", "wis04a");
+            //$instance->db = mysqli_connect("localhost", "root", "root", "wiki");
         }
         return $instance->db;
     }
+
 }
