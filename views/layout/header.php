@@ -65,9 +65,11 @@
               <li><a href="create.php">Create new article</a></li>
 
               <?php
-                foreach(View::getVariable('navigation') as $navigation) {
-                  echo '<li><a href="' . $navigation['link'] . '">' . $navigation['text'] . '</a></li>';
-                }
+              	if(!is_null(View::getVariable('navigation'))){
+	                foreach(View::getVariable('navigation') as $navigation) {
+	                  echo '<li><a href="' . $navigation['link'] . '">' . $navigation['text'] . '</a></li>';
+	                }
+				}
               ?>
 
               <li class="nav-header">Database</li>

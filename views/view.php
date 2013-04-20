@@ -146,6 +146,11 @@ class View {
 	 * @return mixed        The value of the variable
 	 */
 	public static function getVariable($name) {
+		if(!isset(static::$variables[$name]))
+		{
+			return null;
+		}
+		
 		return static::$variables[$name];
 	}
 

@@ -104,11 +104,13 @@ class Paginator {
      */
     public static function page($total, $per_page)
     {
-        $page = $_GET['page'];
-
-        if(is_null($page)) {
+        $page = -1;
+        if(!isset($_GET['page'])) {
             $page = 1;
-        }
+        }else
+        {
+        	$page = $_GET['page'];
+		}
 
         // The page will be validated and adjusted if it is less than one or greater
         // than the last page. For example, if the current page is not an integer or

@@ -1,6 +1,7 @@
 <?php
 
 class ShowController {
+	private static $AMOUNT_OF_ITEMS_PER_PAGE = 10;
 
     /**
      * List all existing articles
@@ -38,12 +39,20 @@ class ShowController {
 
             View::setVariable('error', $error);
         }
-
+		
+		
+		$page = 1;
+		if(isset($_GET['page'])) {
+			$page = $_GET['page'];			
+		}
+		
+		$from = ($page-1)*self::$AMOUNT_OF_ITEMS_PER_PAGE;
+		
         //List pages
-        View::setVariable('articles', Article::loadAll());
+        View::setVariable('articles', Article::loadArticlesForPage($from,self::$AMOUNT_OF_ITEMS_PER_PAGE));
 
         //Set pagination
-        $paginator = Paginator::make('index.php', 100, 10);
+        $paginator = Paginator::make('index.php', Article::getCountOfArticles(), self::$AMOUNT_OF_ITEMS_PER_PAGE);
         //$appendens = array('search' => 'test');
         //$paginator->appends($appendens);
         View::setVariable('paginator', $paginator);
