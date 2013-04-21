@@ -78,7 +78,7 @@ class ActionController {
         }
 
         //Wiki page not found
-        $wikiPage = WikiPage::load($_GET['id']);
+        $wikiPage = Article::load($_GET['id']);
             
         if(is_null($wikiPage)) {
             header('Location: index.php?error=notfound');
