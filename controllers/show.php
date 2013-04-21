@@ -48,11 +48,23 @@ class ShowController {
 		
 		$from = ($page-1)*self::$AMOUNT_OF_ITEMS_PER_PAGE;
 		
+		$searchText = null;
+		
+		if(isset($_GET['search']))
+		{
+			$searchText = $_GET['search'];
+		}
         //List pages
-        View::setVariable('articles', Article::loadArticlesForPage($from,self::$AMOUNT_OF_ITEMS_PER_PAGE));
+        View::setVariable('articles', Article::loadArticlesForPage($from,self::$AMOUNT_OF_ITEMS_PER_PAGE, $searchText));
 
         //Set pagination
-        $paginator = Paginator::make('index.php', Article::getCountOfArticles(), self::$AMOUNT_OF_ITEMS_PER_PAGE);
+        $paginator = Paginator::make('index.php', Article::getCountOfArticles($searchText), self::$AMOUNT_OF_ITEMS_PER_PAGE);
+		if(isset($_GET['search'])) {
+			$appends = array('search' => $_GET['search']);
+			$paginator->appends($appends);
+		}
+		
+		
         //$appendens = array('search' => 'test');
         //$paginator->appends($appendens);
         View::setVariable('paginator', $paginator);

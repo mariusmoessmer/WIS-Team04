@@ -40,7 +40,6 @@ class View {
 	 */
 	public static function printShowView() {
 		$article = static::getVariable('article');
-		;
 
 		$linkEdit = array('text' => 'Edit article', 'link' => 'edit.php?id=' . $article -> getID());
 
@@ -54,6 +53,14 @@ class View {
 
 		//Print wiki text
 		echo $article -> getReplacedContent();
+		
+		$linkingArticles = $article->findLinkingArticles();
+		if ($linkingArticles != null && count($linkingArticles) > 0) {
+			echo '</br> <span class="label label->info">Linking Articles:</span></br>';
+			foreach ($linkingArticles as $linkingArticle) {
+				echo '<a href="index.php?id=' . $linkingArticle->getID() . '">' . $linkingArticle->getTitle() . '</a></br>';
+			}
+		}
 
 		static::printFooter();
 	}

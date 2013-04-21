@@ -35,21 +35,21 @@ class Article {
     public function getContent() {
         return $this->content;
     }
-
-
-
+	
+	private static $LINKED_ARTICLE_PATTERN ='/\[\[(.*?)\]\]/'; 
+	
     //Return the content with all HTML replacements
     public function getReplacedContent() {
         $content = $this->content;
         $content = preg_replace('/---(.*?)---/', '<h3>$1</h3>', $content);		
 		
         //$content = preg_replace_callback('/\[\[(.*?)\]\]/', "<a href=\"index.php?id='$1'\">strlen('$1')</a>", $content);
-		$content = preg_replace_callback('/\[\[(.*?)\]\]/', function($matches){ 
+		$content = preg_replace_callback(self::$LINKED_ARTICLE_PATTERN, function($matches){ 
 			$linked_wikipage_title = $matches[1];
 			$linked_wikipage = Article::findByTitle($linked_wikipage_title);
 
 			if(is_null($linked_wikipage)) {
-				return generateLinkText($linked_wikipage);
+				return ' -- invalid link -- ';
 			}
 			return '<a href="index.php?id=' . $linked_wikipage->getID() . '">' . $linked_wikipage->getTitle() . '</a>'; 
 		}, $content);
@@ -58,19 +58,22 @@ class Article {
         $content = preg_replace('/\n/', '<br />', $content);
         return $content;
     }
-
+	
+	public function isNew()
+	{
+		return is_null($this->id);
+	}
 
 
     //Save the wiki page
     public function save() {
         $mysqli = DatabaseManager::getDatabase();
 
-        if(is_null($this->id)) {
+        if($this->isNew()) {
             //Insert article
             
-            if($stmt = $mysqli->prepare("INSERT INTO ".self::$TABLENAME." (`title`, `content`, `created_ipaddress`) VALUES (?,?,?)")) {
-            	$ipAsLong = ip2long($_SERVER['REMOTE_ADDR']);           
-                $stmt->bind_param("ssi", $this->title, $this->content, $ipAsLong);
+            if($stmt = $mysqli->prepare("INSERT INTO ".self::$TABLENAME." (`title`, `content`) VALUES (?,?)")) {
+                $stmt->bind_param("ss", $this->title, $this->content);
                 $stmt->execute();
                 $this->id = $mysqli->insert_id;
                 $affected_rows = $stmt->affected_rows;
@@ -175,11 +178,60 @@ class Article {
         return $result;
 	}
 	
-	public static function loadArticlesForPage($from = 0, $amountOfItems = 10)
+	public function findLinkingArticles()
+	{
+		$referencingArticles = array();
+		
+		if($this->isNew())
+		{
+			return $referencingArticles;
+		}
+		
+		foreach (self::loadAll() as $article) {
+			if($article->id != $this->id)
+			{
+				foreach($article->getLinkedArticlesFromContent() as $linkedArticle)
+				{
+					if($linkedArticle->id == $this->id){
+						$referencingArticles[] = $article;
+						break; 
+					}
+				}
+			}
+		}
+		
+		return $referencingArticles;
+	}
+	
+	public function getLinkedArticlesFromContent()
+	{
+		$linkedArticles = array();
+		preg_match_all(self::$LINKED_ARTICLE_PATTERN, $this->content, $matches);
+		
+		foreach($matches[1] as $match){
+			$article = Article::findByTitle($match);
+			if(!is_null($article))
+			{
+				$linkedArticles[] = $article;
+			}
+		}
+		
+		return $linkedArticles;
+	}
+	
+	public static function loadArticlesForPage($from = 0, $amountOfItems = 10, $searchText = null)
 	{
 		$mysqli = DatabaseManager::getDatabase();
+		
+		$query = 'SELECT article_id, title, content FROM '.self::$TABLENAME;
+		
+		if(!is_null($searchText)){
+			$query .= ' WHERE title LIKE \'%'.$searchText.'%\'';
+		}
+		
+		$query.=' ORDER BY article_id LIMIT '.$from.', '.$amountOfItems;
 
-        if($stmt = $mysqli->prepare('SELECT article_id, title, content FROM '.self::$TABLENAME.' ORDER BY article_id LIMIT '.$from.', '.$amountOfItems)) {
+        if($stmt = $mysqli->prepare($query)) {
             $pages = array();
             
             $stmt->execute();
@@ -220,37 +272,63 @@ class Article {
         }
     }
     
+	private static $MAX_INSERT_INTOS_PER_CALL = 100;
     //generates an amount of random articles and saves them to database
-    public static function generateRandomAndSave($amount = 10000) {
-    	$i = 0;
-        while($i < $amount) {
-        	if(self::generateRandom()->save()) {
-				$i++;
+    public static function generateRandomAndSave($amount = 10000) {		
+		$mysqli = DatabaseManager::getDatabase();
+		
+		$created_articles = 0;
+		
+		$i = 0;
+		while($created_articles < $amount)
+		{
+			$sqlQuery = 'INSERT INTO '.self::$TABLENAME.' (`title`, `content`) VALUES';
+			for($j = 0; $j < self::$MAX_INSERT_INTOS_PER_CALL && $created_articles < $amount; $j++)
+			{
+				$title = ''.($i++);
+				$content = self::generateRandomContentText($i);
+  				$sqlQuery .= ('(\''.$title.'\', \''.$content.'\'),');
 			}
-        }
-    }
-    
-    private static $RANDOM_TITLE_LENGTH = 10;
-    private static $CONTENT_GAP_LENGTH = 10;
+			// replace last comma with semicolon
+			$sqlQuery = substr_replace($sqlQuery ,';',-1);
+			if($mysqli->query($sqlQuery))
+			{
+					$created_articles = ($created_articles+$mysqli->affected_rows);
+			}else{
+				// articles with title "$i" already exist... increment i by $amount (performance-speedup)
+				$i = $i + $amount;
+			}
+		}
+		
+		echo 'created: '.$created_articles;
+	}
+	
     private static $MAX_RANDOM_ARTICLE_LINKS = 3;
     //generates a random article
-    private static function generateRandom() {	
+    private static function generateRandomContentText() {	
 		
-		$title = self::randomString(self::$RANDOM_TITLE_LENGTH);
+		$content = $content_gap_text = 'lorem ipsum ';
+		$randomArticles = self::getRandomArticles();
 		
-		srand((double)microtime()*1000000);
+		if(is_null($randomArticles) || count($randomArticles) == 0)
+		{
+			return $content;
+		}
+		
 		$randomGeneratedLinkAmount = rand() % self::$MAX_RANDOM_ARTICLE_LINKS;
-		
-		
-		$content_gap_text = 'trallalal ';
-		$content = $content_gap_text = 'trallalal ';//self::randomString(self::$CONTENT_GAP_LENGTH);
 		for ($i = 0; $i < $randomGeneratedLinkAmount; $i++) {
-			//$content = $content . ' ' . self::generateLinkText(self::getRandomArticle());
+			$randomArticle = $randomArticles[array_rand($randomArticles)];
+			$content = $content . ' ' . self::generateLinkText($randomArticle);
 			$content = $content . ' ' . $content_gap_text;
 		}
 		
-		return new Article(null, $title, $content);
+		// fill up words
+		for ($i = 0; $i < 250; $i++) {
+			$content .= $content_gap_text;
+		}
 		
+		
+		return $content;
     }
     
     private static function generateLinkText($article)
@@ -263,50 +341,52 @@ class Article {
 		return '[[' . $article->title . ']]';	
 	}
     
-    private static function getRandomArticle()
+    private static function getRandomArticles($amount = 100)
     {		
-		$result = null;
+		$articles = array();
 
         $mysqli = DatabaseManager::getDatabase();
-
-        if($stmt = $mysqli->prepare('SELECT article_id, title, content, article_id* RAND( ) AS random_no FROM '.self::$TABLENAME.'ORDER BY random_no LIMIT 1')) {
+		
+        if($stmt = $mysqli->prepare('SELECT article_id, title, content FROM '.self::$TABLENAME.' LIMIT '.$amount)) {
             $stmt->execute();
-            $stmt->bind_result($article_id, $title, $content, $random_no);
+            $stmt->bind_result($article_id, $title, $content);
 
-            if($stmt->fetch()) {
-                $result = new Article($article_id, $title, $content);
+
+            while($stmt->fetch()) {
+                $articles[] = new Article($article_id, $title, $content);
             }
             
             $stmt->close();
         }
-
-        return $result;
+        return $articles;
 	}
     
     // define allowed chars for generating random strings
     public static $randomChars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     private static function randomString($length = 6) {		
-    	$generatedString = '';
-    	// init rand
-		srand((double)microtime()*1000000);
-		for ($i = 0; $i < $length; $i++) {
-			// get random number: 0 <= number < strlen($randomChars)
-			$num = rand() % strlen(self::$randomChars);
-			// extract random char
-			$tmp = substr(self::$randomChars, $num, 1);
-			$generatedString = $generatedString . $tmp;
-		}
+		 $randomString = '';
+    	for ($i = 0; $i < $length; $i++) {
+        	$randomString .= self::$randomChars[rand(0, strlen(self::$randomChars) - 1)];
+    	}
+    	return $randomString;
   	
-		return $generatedString;
     }
 	
 	
-	public static function getCountOfArticles()
+	public static function getCountOfArticles($searchText = null)
 	{
         $result = null;
 
         $mysqli = DatabaseManager::getDatabase();
-        if($stmt = $mysqli->prepare("SELECT COUNT(*) FROM ".self::$TABLENAME)) {		
+		
+		$query = 'SELECT COUNT(*) FROM '.self::$TABLENAME;
+		
+		if(!is_null($searchText))
+		{
+			$query.=' WHERE title LIKE \'%'.$searchText.'%\'';
+		}
+		
+        if($stmt = $mysqli->prepare($query)) {		
             $stmt->execute();
             $stmt->bind_result($result);
             if(! $stmt->fetch()) {
